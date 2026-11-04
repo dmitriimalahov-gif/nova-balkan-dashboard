@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <title>Экономия упаковки — Balkan</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#f5f7fa;color:#26384a;font:16px/1.6 system-ui,sans-serif}main{max-width:560px;width:100%;padding:40px;border:1px solid #dce4ea;border-radius:20px;background:white}small{color:#537282}h1{font-size:30px;line-height:1.2;margin:14px 0}p{color:#5e6d7a}a,button{display:inline-block;border:0;border-radius:9px;background:#315f7c;color:white;font:inherit;padding:12px 20px;text-decoration:none;cursor:pointer}a[hidden],button[hidden]{display:none}.note{font-size:14px;margin-top:24px}
+  </style>
+</head>
+<body><main>
+  <small>BALKAN · ЭКОНОМИЯ УПАКОВКИ</small>
+  <h1>Дашборд экономии</h1>
+  <p id="status" role="status">Подключаемся к актуальному отчёту…</p>
+  <a id="open" hidden rel="noreferrer">Открыть дашборд</a>
+  <button id="retry" hidden>Повторить</button>
+  <p class="note">Вход по логину и паролю. Для доступа компьютер с дашбордом должен быть включён и подключён к интернету.</p>
+  <noscript><p>Включите JavaScript, чтобы открыть актуальный адрес дашборда.</p></noscript>
+</main>
+<script>
+'use strict';
+async function connect() {
+  const status = document.getElementById('status');
+  const open = document.getElementById('open');
+  const retry = document.getElementById('retry');
+  retry.hidden = true;
+  status.textContent = 'Подключаемся к актуальному отчёту…';
+  try {
+    const response = await fetch('./connection.json?t=' + Date.now(), {cache:'no-store', signal:AbortSignal.timeout(15000)});
+    if (!response.ok) throw new Error('connection unavailable');
+    const data = await response.json();
+    if (typeof data.url !== 'string' || !/^https:\/\/[a-z0-9]+(?:-[a-z0-9]+)*\.trycloudflare\.com\/boxes$/.test(data.url)) throw new Error('invalid address');
+    open.href = data.url;
+    open.hidden = false;
+    status.textContent = 'Открываем защищённый дашборд. При первом входе браузер запросит логин и пароль.';
+    window.location.replace(data.url);
+  } catch (_) {
+    status.textContent = 'Подключение пока не готово. Повторите через минуту; если проблема сохраняется, проверьте компьютер с дашбордом.';
+    retry.hidden = false;
+  }
+}
+document.getElementById('retry').addEventListener('click', connect);
+connect();
+</script></body></html>
